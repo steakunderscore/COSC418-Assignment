@@ -1,4 +1,10 @@
 COMPONENT=MultihopOscilloscopeAppC
+
+# This is for us to use our version of CTP
+CFLAGS += -I../ctp_lb
 CFLAGS += -I$(TOSDIR)/lib/net/ -I$(TOSDIR)/lib/net/ctp  -I$(TOSDIR)/lib/net/4bitle
+
+# This is the orgional line using the TOS CTP
+#CFLAGS += -I$(TOSDIR)/lib/net/ -I$(TOSDIR)/lib/net/ctp  -I$(TOSDIR)/lib/net/4bitle
 
 include $(MAKERULES)
