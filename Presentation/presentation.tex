@@ -1,0 +1,196 @@
+%\documentclass[handout]{beamer}
+\documentclass{beamer}
+
+\usetheme[secheader]{Boadilla}
+\usecolortheme{seahorse}
+\usepackage[latin1]{inputenc}
+
+\title{ENEL350 Project 3:\\Power-Profiler for Wireless Sensor Networks \\ (6-AIM)}
+\author{Henry V. Jenkins (hvj10)}
+\date{October 6, 2010}
+\institute[2010]{Department of Computer and Electrical Engineering,\\
+    University of Canterbury, \\ Christchurch, \\ New Zealand}
+
+\begin{document}
+
+\frame{\titlepage}
+
+%\section[Outline]{}
+%\frame{\tableofcontents}
+
+\section{Overview}
+\subsection{WSN}
+
+\begin{frame} 
+  \frametitle{What is a Wireless Sensor Network?}
+    \begin{columns}[c] % the "c" option specifies center vertical alignment
+      \column{.45\textwidth} % column designated by a command
+        \begin{itemize}
+          \item<1-> Nodes collect sensor data
+          \item<2-> Wireless communication
+          \item<3-> Battery powered
+          \item<4-> Applications
+            \begin{itemize}
+            \item Military
+            \item Environment Monitoring
+            \item Seismic Monitoring
+            \item Medical
+            \item Home automation
+            \end{itemize}
+        \end{itemize}
+      \column{.55\textwidth}
+        \begin{center}
+%	      \includegraphics{trefoil.eps}
+          \includegraphics[width=\textwidth]{Images/WSN}
+        \end{center}
+    \end{columns}
+\end{frame}
+
+\subsection{Design Requirements}
+\frame {
+  \frametitle{Requirements}
+  \begin{enumerate}
+    \item<1-> Measurements
+    \begin{enumerate}
+	  \item Measure supply currents ranging from 0.1 uA up to 100 mA
+      \item Measure currents at Frequency range of DC to 10 kHz
+      \item Measure supply voltages of up to 10V with a resolution of 0.1 mV
+    \end{enumerate}
+    \item<2-> External Interface
+    \begin{enumerate}
+      \item Allows the user to turn sensor on or off, and to start or stop data
+            recording
+      \item Provide indication of on/off status and whether recording is underway
+      \item Allow retrieval of recorded measurements
+    \end{enumerate}
+    \item<3-> Power Supply (Battery)
+    \begin{enumerate}
+      \item Should be replaceable, or rechargeable via USB
+      \item Should allow at least 24 hours of use before requiring replacement or
+            recharge
+    \end{enumerate}
+  \end{enumerate}
+}
+
+\section{Technical}
+%TODO talk about requirments
+%TODO How are we measureing currnet and voltage
+\subsection{Main Circuit}
+\begin{frame}
+  \frametitle{Circuit Block Diagram}
+    \begin{center}
+      \includegraphics[width=.8\textwidth]{../Report/Images/CircuitBlockDiagram}
+    \end{center}
+  \end{frame}
+
+\subsection{Data collection}
+\begin{frame}
+  \frametitle{ADC Circuits}
+    \begin{columns}[c] % the "c" option specifies center vertical alignment
+      \column{.5\textwidth} % column designated by a command
+        \begin{itemize}
+          \item<1-> MOSFET to disconnect
+          \item<1-> Voltage divider for 3.3$V_{Max}$
+        \end{itemize}
+      \column{.5\textwidth}
+        \begin{center}
+          \includegraphics[width=\textwidth]<1->{../Report/Images/VoltageSensorCircuit}
+        \end{center}
+    \end{columns}
+
+    \begin{columns}[c] % the "c" option specifies center vertical alignment
+      \column{.5\textwidth} % column designated by a command
+        \begin{itemize}
+          \item<2-> 1 Ohm Resister
+          \item<2-> $.1\mu V < V_{R} < 100mV$
+          \item<2-> Op-amp to bring voltage $0V < V_{opamp} < 3.3V$
+        \end{itemize}
+      \column{.5\textwidth}
+        \begin{center}
+          \includegraphics[width=\textwidth]<2->{../Report/Images/CurrentSensorCircuit}
+        \end{center}
+    \end{columns}
+\end{frame}
+
+\subsection{Data numbers}
+\frame {
+  \frametitle{How much data?}
+    \begin{itemize}
+      \item<1-> Measure current at frequency of 10 kHz
+        \begin{itemize}
+          \item That's 20 kHz to prevent aliasing
+        \end{itemize}
+      \item<2-> 20 bits per sample
+      \item<3-> 24 Hours
+      \item<4-> 4.32 GB
+    \end{itemize}
+}
+
+\subsection{Power Supply}
+\frame {
+  \frametitle{Batter Power Supply}
+  \begin{columns}
+  \column{.5\textwidth}
+    \begin{itemize}
+    \item<1-> Requires
+      \begin{itemize}
+        \item 3.3V
+        \item 335mA
+        \item 8 Amp-hours
+        \item Rechargeable
+      \end{itemize}
+    \item 3x D cell NiMH
+    \begin{itemize}
+    \item 9 Amp-hours
+    \item 3.6V
+    \end{itemize}
+  \end{itemize}
+  \column{.5\textwidth}
+    \includegraphics[width=\textwidth]{Images/Battery}
+  \end{columns}
+}
+
+\section{Conclusion}
+\subsection{Future Developments}
+\frame {
+  \frametitle{Future Developments}
+    \begin{itemize}
+      \item<1-> Event Marking
+      \item<2-> Collect Other Environmental Data
+      \begin{itemize}
+        \item Temperature
+        \item Humidity
+        \item Vibration
+        % On a pole causing antina shaking etc.
+        \item Moisture
+      \end{itemize}
+      \item<3-> It's own wireless sensor network
+    \end{itemize}
+}
+\subsection{Conclusion}
+\frame {
+  \frametitle{Conclusion}
+    \begin{itemize}
+      \item<1-> 24 Hours data collection
+      \item<2-> 4.3 GB of data collected
+      \begin{itemize}
+        \item Easily accessible by operator
+        \item Post processing on computer
+      \end{itemize}
+      \item<3-> Longer data collection periods
+    \end{itemize}
+}
+
+\section{Questions}
+
+\frame {
+  \frametitle{Questions?}
+  \begin{LARGE}
+    \begin{center}
+    Questions?
+    \end{center}
+  \end{LARGE}
+}
+
+
+\end{document}
