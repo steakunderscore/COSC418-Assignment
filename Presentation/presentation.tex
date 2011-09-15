@@ -4,11 +4,12 @@
 \usetheme[secheader]{Boadilla}
 \usecolortheme{seahorse}
 \usepackage[latin1]{inputenc}
+\usepackage{mathtools}
 
-\title{ENEL350 Project 3:\\Power-Profiler for Wireless Sensor Networks \\ (6-AIM)}
-\author{Henry V. Jenkins (hvj10)}
-\date{October 6, 2010}
-\institute[2010]{Department of Computer and Electrical Engineering,\\
+\title{COSC418 Project:\\Load balancing in a CTP based network}
+\author{Henry Jenkins and Regan Gunther}
+\date{September 16, 2011}
+\institute[2011]{Department of Computer and Electrical Engineering,\\
     University of Canterbury, \\ Christchurch, \\ New Zealand}
 
 \begin{document}
@@ -19,178 +20,242 @@
 %\frame{\tableofcontents}
 
 \section{Overview}
-\subsection{WSN}
+\subsection{CTP}
 
 \begin{frame} 
-  \frametitle{What is a Wireless Sensor Network?}
-    \begin{columns}[c] % the "c" option specifies center vertical alignment
-      \column{.45\textwidth} % column designated by a command
-        \begin{itemize}
-          \item<1-> Nodes collect sensor data
-          \item<2-> Wireless communication
-          \item<3-> Battery powered
-          \item<4-> Applications
-            \begin{itemize}
-            \item Military
-            \item Environment Monitoring
-            \item Seismic Monitoring
-            \item Medical
-            \item Home automation
-            \end{itemize}
-        \end{itemize}
-      \column{.55\textwidth}
-        \begin{center}
-%	      \includegraphics{trefoil.eps}
-          \includegraphics[width=\textwidth]{Images/WSN}
-        \end{center}
-    \end{columns}
-\end{frame}
-
-\subsection{Design Requirements}
-\frame {
-  \frametitle{Requirements}
-  \begin{enumerate}
-    \item<1-> Measurements
-    \begin{enumerate}
-	  \item Measure supply currents ranging from 0.1 uA up to 100 mA
-      \item Measure currents at Frequency range of DC to 10 kHz
-      \item Measure supply voltages of up to 10V with a resolution of 0.1 mV
-    \end{enumerate}
-    \item<2-> External Interface
-    \begin{enumerate}
-      \item Allows the user to turn sensor on or off, and to start or stop data
-            recording
-      \item Provide indication of on/off status and whether recording is underway
-      \item Allow retrieval of recorded measurements
-    \end{enumerate}
-    \item<3-> Power Supply (Battery)
-    \begin{enumerate}
-      \item Should be replaceable, or rechargeable via USB
-      \item Should allow at least 24 hours of use before requiring replacement or
-            recharge
-    \end{enumerate}
-  \end{enumerate}
-}
-
-\section{Technical}
-%TODO talk about requirments
-%TODO How are we measureing currnet and voltage
-\subsection{Main Circuit}
-\begin{frame}
-  \frametitle{Circuit Block Diagram}
-    \begin{center}
-      \includegraphics[width=.8\textwidth]{../Report/Images/CircuitBlockDiagram}
-    \end{center}
-  \end{frame}
-
-\subsection{Data collection}
-\begin{frame}
-  \frametitle{ADC Circuits}
-    \begin{columns}[c] % the "c" option specifies center vertical alignment
-      \column{.5\textwidth} % column designated by a command
-        \begin{itemize}
-          \item<1-> MOSFET to disconnect
-          \item<1-> Voltage divider for 3.3$V_{Max}$
-        \end{itemize}
-      \column{.5\textwidth}
-        \begin{center}
-          \includegraphics[width=\textwidth]<1->{../Report/Images/VoltageSensorCircuit}
-        \end{center}
-    \end{columns}
-
-    \begin{columns}[c] % the "c" option specifies center vertical alignment
-      \column{.5\textwidth} % column designated by a command
-        \begin{itemize}
-          \item<2-> 1 Ohm Resister
-          \item<2-> $.1\mu V < V_{R} < 100mV$
-          \item<2-> Op-amp to bring voltage $0V < V_{opamp} < 3.3V$
-        \end{itemize}
-      \column{.5\textwidth}
-        \begin{center}
-          \includegraphics[width=\textwidth]<2->{../Report/Images/CurrentSensorCircuit}
-        \end{center}
-    \end{columns}
-\end{frame}
-
-\subsection{Data numbers}
-\frame {
-  \frametitle{How much data?}
-    \begin{itemize}
-      \item<1-> Measure current at frequency of 10 kHz
-        \begin{itemize}
-          \item That's 20 kHz to prevent aliasing
-        \end{itemize}
-      \item<2-> 20 bits per sample
-      \item<3-> 24 Hours
-      \item<4-> 4.32 GB
-    \end{itemize}
-}
-
-\subsection{Power Supply}
-\frame {
-  \frametitle{Batter Power Supply}
-  \begin{columns}
-  \column{.5\textwidth}
-    \begin{itemize}
-    \item<1-> Requires
+  \frametitle{Overview}
+  \begin{itemize}
+    \item CTP - Collection Tree Protocol
       \begin{itemize}
-        \item 3.3V
-        \item 335mA
-        \item 8 Amp-hours
-        \item Rechargeable
+        \item Address-free
+        \item Best effort delivery
+        \item Single hop transmissions
+        \item Designed for low traffic environments
+        \item Expected transmission (ETX) 
+        \item Each node contains a Link Cost metric.
       \end{itemize}
-    \item 3x D cell NiMH
-    \begin{itemize}
-    \item 9 Amp-hours
-    \item 3.6V
-    \end{itemize}
+    \item CTP LB - Collection Tree Protocol Load Balancing
+      \begin{itemize}
+        \item Add load balancing
+        \item Avoid node hotspots
+        \item Traffic balancing
+      \end{itemize}
   \end{itemize}
-  \column{.5\textwidth}
-    \includegraphics[width=\textwidth]{Images/Battery}
-  \end{columns}
-}
+\end{frame}
 
-\section{Conclusion}
-\subsection{Future Developments}
-\frame {
-  \frametitle{Future Developments}
-    \begin{itemize}
-      \item<1-> Event Marking
-      \item<2-> Collect Other Environmental Data
-      \begin{itemize}
-        \item Temperature
-        \item Humidity
-        \item Vibration
-        % On a pole causing antina shaking etc.
-        \item Moisture
-      \end{itemize}
-      \item<3-> It's own wireless sensor network
+\begin{frame}
+  \frametitle{Our Design}
+  \begin{itemize}
+    \item $p^* = \text{arg min}  p \in \{\ \text{direct neighbours} \}\
+      [\alpha  \cdot (ETX_{s,p} + ETX_p) + \beta \cdot L_p^s]$
+
+    \item Our design is to keep $L_p^s$ locally 
+    \item We increment $L_p^s$ as:
+    \item $L_p^s = n_p^s - t_p^s$
+    \item $n_p^s \geq t_p^s$
+    \item Where $t_p^s$ is incremented periodically through a timer
+    \item $t_p^s$ is included to stop $L_p^s$ getting too large.
+    \item \textbf{Why do this instead of transmitting link load data}
+    \item Allows us to use the unmodified CTP routing packet
+    \item Means we can add load balancing to an existing CTP network
+    \item No extra data transmission
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Drawbacks}
+    What if $ETX_p + ETX_{p,s} + L_p^s$ (i.e. $ETX_s$) increases to be $\geq 2^{16}$?
+  \begin{itemize}
+    \item Bad things\ldots
+    \item This is managed by including the $t_p^s$ in the loading parameter
+    $L_p^s$
+    \item (Remember $L_p^s = n_p^s - t_p^s$ )
+    \item Periodic timer.
+  \end{itemize}
+\end{frame}  
+
+
+
+\begin{frame}
+  \frametitle{Drawbacks}
+    ETX changing with each packet transmission causes routing updates all the
+    time. All these updates would be inefficient.
+  \begin{itemize}
+    \item A solution to this is to only update routes when ETX changes by a given
+    threshold
     \end{itemize}
-}
-\subsection{Conclusion}
-\frame {
+\end{frame}  
+
+
+\begin{frame}
+  \frametitle{Drawbacks}
+    Exponential ETX growth of a node
+  \begin{itemize}
+    \item In a path of 5 nodes to the root, $L_p^s$ increases with every packet.
+    The more hops to the root, the more pronounced this effect
+  \end{itemize}
+\end{frame}  
+
+
+\begin{frame}
   \frametitle{Conclusion}
-    \begin{itemize}
-      \item<1-> 24 Hours data collection
-      \item<2-> 4.3 GB of data collected
-      \begin{itemize}
-        \item Easily accessible by operator
-        \item Post processing on computer
-      \end{itemize}
-      \item<3-> Longer data collection periods
-    \end{itemize}
-}
+  \begin{itemize}
+    \item No results as yet
+    \item Currently implementing and testing code
+  \end{itemize}
+\end{frame}  
 
-\section{Questions}
 
-\frame {
-  \frametitle{Questions?}
-  \begin{LARGE}
-    \begin{center}
-    Questions?
-    \end{center}
-  \end{LARGE}
-}
+
+
+
+%
+%\subsection{Design Requirements}
+%\frame {
+%  \frametitle{Requirements}
+%  \begin{enumerate}
+%    \item<1-> Measurements
+%    \begin{enumerate}
+%	  \item Measure supply currents ranging from 0.1 uA up to 100 mA
+%      \item Measure currents at Frequency range of DC to 10 kHz
+%      \item Measure supply voltages of up to 10V with a resolution of 0.1 mV
+%    \end{enumerate}
+%    \item<2-> External Interface
+%    \begin{enumerate}
+%      \item Allows the user to turn sensor on or off, and to start or stop data
+%            recording
+%      \item Provide indication of on/off status and whether recording is underway
+%      \item Allow retrieval of recorded measurements
+%    \end{enumerate}
+%    \item<3-> Power Supply (Battery)
+%    \begin{enumerate}
+%      \item Should be replaceable, or rechargeable via USB
+%      \item Should allow at least 24 hours of use before requiring replacement or
+%            recharge
+%    \end{enumerate}
+%  \end{enumerate}
+%}
+%
+%\section{Technical}
+%%TODO talk about requirments
+%%TODO How are we measureing currnet and voltage
+%\subsection{Main Circuit}
+%\begin{frame}
+%  \frametitle{Circuit Block Diagram}
+%  \begin{center}
+%    \includegraphics[width=.8\textwidth]{../Report/Images/CircuitBlockDiagram}
+%  \end{center}
+%\end{frame}
+%
+%\subsection{Data collection}
+%\begin{frame}
+%  \frametitle{ADC Circuits}
+%    \begin{columns}[c] % the "c" option specifies center vertical alignment
+%      \column{.5\textwidth} % column designated by a command
+%        \begin{itemize}
+%          \item<1-> MOSFET to disconnect
+%          \item<1-> Voltage divider for 3.3$V_{Max}$
+%        \end{itemize}
+%      \column{.5\textwidth}
+%        \begin{center}
+%          \includegraphics[width=\textwidth]<1->{../Report/Images/VoltageSensorCircuit}
+%        \end{center}
+%    \end{columns}
+%
+%    \begin{columns}[c] % the "c" option specifies center vertical alignment
+%      \column{.5\textwidth} % column designated by a command
+%        \begin{itemize}
+%          \item<2-> 1 Ohm Resister
+%          \item<2-> $.1\mu V < V_{R} < 100mV$
+%          \item<2-> Op-amp to bring voltage $0V < V_{opamp} < 3.3V$
+%        \end{itemize}
+%      \column{.5\textwidth}
+%        \begin{center}
+%          \includegraphics[width=\textwidth]<2->{../Report/Images/CurrentSensorCircuit}
+%        \end{center}
+%    \end{columns}
+%\end{frame}
+%
+%\subsection{Data numbers}
+%\frame {
+%  \frametitle{How much data?}
+%    \begin{itemize}
+%      \item<1-> Measure current at frequency of 10 kHz
+%        \begin{itemize}
+%          \item That's 20 kHz to prevent aliasing
+%        \end{itemize}
+%      \item<2-> 20 bits per sample
+%      \item<3-> 24 Hours
+%      \item<4-> 4.32 GB
+%    \end{itemize}
+%}
+%
+%\subsection{Power Supply}
+%\frame {
+%  \frametitle{Batter Power Supply}
+%  \begin{columns}
+%  \column{.5\textwidth}
+%    \begin{itemize}
+%    \item<1-> Requires
+%      \begin{itemize}
+%        \item 3.3V
+%        \item 335mA
+%        \item 8 Amp-hours
+%        \item Rechargeable
+%      \end{itemize}
+%    \item 3x D cell NiMH
+%    \begin{itemize}
+%    \item 9 Amp-hours
+%    \item 3.6V
+%    \end{itemize}
+%  \end{itemize}
+%  \column{.5\textwidth}
+%    \includegraphics[width=\textwidth]{Images/Battery}
+%  \end{columns}
+%}
+%
+%\section{Conclusion}
+%\subsection{Future Developments}
+%\frame {
+%  \frametitle{Future Developments}
+%    \begin{itemize}
+%      \item<1-> Event Marking
+%      \item<2-> Collect Other Environmental Data
+%      \begin{itemize}
+%        \item Temperature
+%        \item Humidity
+%        \item Vibration
+%        % On a pole causing antina shaking etc.
+%        \item Moisture
+%      \end{itemize}
+%      \item<3-> It's own wireless sensor network
+%    \end{itemize}
+%}
+%\subsection{Conclusion}
+%\frame {
+%  \frametitle{Conclusion}
+%    \begin{itemize}
+%      \item<1-> 24 Hours data collection
+%      \item<2-> 4.3 GB of data collected
+%      \begin{itemize}
+%        \item Easily accessible by operator
+%        \item Post processing on computer
+%      \end{itemize}
+%      \item<3-> Longer data collection periods
+%    \end{itemize}
+%}
+%
+%\section{Questions}
+%
+%\frame {
+%  \frametitle{Questions?}
+%  \begin{LARGE}
+%    \begin{center}
+%    Questions?
+%    \end{center}
+%  \end{LARGE}
+%}
 
 
 \end{document}
