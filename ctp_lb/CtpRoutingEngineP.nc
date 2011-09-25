@@ -1,5 +1,6 @@
 #include <Timer.h>
 #include <TreeRouting.h>
+#include <printf.h>
 #include <CollectionDebugMsg.h>
 /* $Id: CtpRoutingEngineP.nc,v 1.25 2010-06-29 22:07:49 scipio Exp $ */
 /*
@@ -108,6 +109,7 @@ generic module CtpRoutingEngineP(uint8_t routingTableSize, uint32_t minInterval,
     provides {
         interface UnicastNameFreeRouting as Routing;
         interface RootControl;
+        //interface RouteControl;
         interface CtpInfo;
         interface StdControl;
         interface CtpRoutingPacket;
@@ -162,6 +164,9 @@ implementation {
     uint32_t parentChanges;
     /* end statistics */
 
+    // ETX for load balencing
+    uint16_t loadEtx;
+
     // forward declarations
     void routingTableInit();
     uint8_t routingTableFind(am_addr_t);
@@ -215,6 +220,7 @@ implementation {
         radioOn = FALSE;
         running = FALSE;
         parentChanges = 0;
+        loadEtx = 0;
         state_is_root = 0;
         routeInfoInit(&routeInfo);
         routingTableInit();
@@ -229,10 +235,10 @@ implementation {
       my_ll_addr = call AMPacket.address();
       //start will (re)start the sending of messages
       if (!running) {
-	running = TRUE;
-	resetInterval();
-	call RouteTimer.startPeriodic(BEACON_INTERVAL);
-	dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
+          running = TRUE;
+          resetInterval();
+          call RouteTimer.startPeriodic(BEACON_INTERVAL);
+          dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
       }     
       return SUCCESS;
     }
@@ -246,6 +252,7 @@ implementation {
     event void RadioControl.startDone(error_t error) {
         radioOn = TRUE;
         dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
+        printfflush();
         if (running) {
             uint16_t nextInt;
             nextInt = call Random.rand16() % BEACON_INTERVAL;
@@ -264,6 +271,10 @@ implementation {
         return (etx < ETX_THRESHOLD);
     }
 
+   /*command void PacketSent() {
+        loadEtx++;
+   }
+   */
 
     /* updates the routing information, using the info that has been received
      * from neighbor beacons. Two things can cause this info to change: 
@@ -276,6 +287,8 @@ implementation {
         uint16_t currentEtx;
         uint16_t linkEtx, pathEtx;
 
+        printf("The update route task function was called\n");
+        printfflush();
         if (state_is_root)
             return;
        
@@ -301,16 +314,16 @@ implementation {
 
             linkEtx = call LinkEstimator.getLinkQuality(entry->neighbor);
             dbg("TreeRouting", 
-                "routingTable[%d]: neighbor: [id: %d parent: %d etx: %d retx: %d]\n",  
-                i, entry->neighbor, entry->info.parent, linkEtx, entry->info.etx);
+                    "routingTable[%d]: neighbor: [id: %d parent: %d etx: %d retx: %d]\n",  
+                    i, entry->neighbor, entry->info.parent, linkEtx, entry->info.etx);
             pathEtx = linkEtx + entry->info.etx;
             /* Operations specific to the current parent */
             if (entry->neighbor == routeInfo.parent) {
                 dbg("TreeRouting", "   already parent.\n");
                 currentEtx = pathEtx;
                 /* update routeInfo with parent's current info */
-		routeInfo.etx = entry->info.etx;
-		routeInfo.congested = entry->info.congested;
+                routeInfo.etx = entry->info.etx;
+                routeInfo.congested = entry->info.congested;
                 continue;
             }
             /* Ignore links that are congested */
@@ -323,7 +336,7 @@ implementation {
             }
             
             if (pathEtx < minEtx) {
-	      dbg("TreeRouting", "   best is %d, setting to %d\n", pathEtx, entry->neighbor);
+                dbg("TreeRouting", "   best is %d, setting to %d\n", pathEtx, entry->neighbor);
                 minEtx = pathEtx;
                 best = entry;
             }  
@@ -358,12 +371,12 @@ implementation {
                 call LinkEstimator.pinNeighbor(best->neighbor);
                 call LinkEstimator.clearDLQ(best->neighbor);
 
-		routeInfo.parent = best->neighbor;
-		routeInfo.etx = best->info.etx;
-		routeInfo.congested = best->info.congested;
-		if (currentEtx - minEtx > 20) {
-		  call CtpInfo.triggerRouteUpdate();
-		}
+                routeInfo.parent = best->neighbor;
+                routeInfo.etx = best->info.etx;
+                routeInfo.congested = best->info.congested;
+                if (currentEtx - minEtx > 20) {
+                    call CtpInfo.triggerRouteUpdate();
+                }
             }
         }    
 
@@ -408,7 +421,7 @@ implementation {
             beaconMsg->etx = routeInfo.etx;
             beaconMsg->options |= CTP_OPT_PULL;
         } else {
-            beaconMsg->etx = routeInfo.etx + call LinkEstimator.getLinkQuality(routeInfo.parent);
+            beaconMsg->etx = routeInfo.etx + call LinkEstimator.getLinkQuality(routeInfo.parent) + loadEtx;
         }
 
         dbg("TreeRouting", "%s parent: %d etx: %d\n",
@@ -601,13 +614,16 @@ implementation {
     command error_t RootControl.setRoot() {
         bool route_found = FALSE;
         route_found = (routeInfo.parent == INVALID_ADDR);
-	state_is_root = 1;
-	routeInfo.parent = my_ll_addr; //myself
-	routeInfo.etx = 0;
+        state_is_root = 1;
+        routeInfo.parent = my_ll_addr; //myself
+        printf("My ll address is %d\n",my_ll_addr);
+        routeInfo.etx = 0;
 
         if (route_found) 
             signal Routing.routeFound();
         dbg("TreeRouting","%s I'm a root now!\n",__FUNCTION__);
+        printf("I'm a root now!\n");
+        printfflush();
         call CollectionDebug.logEventRoute(NET_C_TREE_NEW_PARENT, routeInfo.parent, 0, routeInfo.etx);
         return SUCCESS;
     }
@@ -718,7 +734,7 @@ implementation {
         if (idx == routingTableSize) {
             //not found and table is full
             //if (passLinkEtxThreshold(linkEtx))
-                //TODO: add replacement here, replace the worst
+            //TODO: add replacement here, replace the worst
             //}
             dbg("TreeRouting", "%s FAIL, table full\n", __FUNCTION__);
             return FAIL;
@@ -726,23 +742,23 @@ implementation {
         else if (idx == routingTableActive) {
             //not found and there is space
             if (passLinkEtxThreshold(linkEtx)) {
-	      routingTable[idx].neighbor = from;
-	      routingTable[idx].info.parent = parent;
-	      routingTable[idx].info.etx = etx;
-	      routingTable[idx].info.haveHeard = 1;
-	      routingTable[idx].info.congested = FALSE;
-	      routingTableActive++;
-	      dbg("TreeRouting", "%s OK, new entry\n", __FUNCTION__);
+                routingTable[idx].neighbor = from;
+                routingTable[idx].info.parent = parent;
+                routingTable[idx].info.etx = etx;
+                routingTable[idx].info.haveHeard = 1;
+                routingTable[idx].info.congested = FALSE;
+                routingTableActive++;
+                dbg("TreeRouting", "%s OK, new entry\n", __FUNCTION__);
             } else {
                 dbg("TreeRouting", "%s Fail, link quality (%hu) below threshold\n", __FUNCTION__, linkEtx);
             }
         } else {
             //found, just update
-	  routingTable[idx].neighbor = from;
-	  routingTable[idx].info.parent = parent;
-	  routingTable[idx].info.etx = etx;
-	  routingTable[idx].info.haveHeard = 1;
-	  dbg("TreeRouting", "%s OK, updated entry\n", __FUNCTION__);
+            routingTable[idx].neighbor = from;
+            routingTable[idx].info.parent = parent;
+            routingTable[idx].info.etx = etx;
+            routingTable[idx].info.haveHeard = 1;
+            dbg("TreeRouting", "%s OK, updated entry\n", __FUNCTION__);
         }
         return SUCCESS;
     }

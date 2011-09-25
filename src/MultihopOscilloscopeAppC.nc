@@ -20,6 +20,7 @@ configuration MultihopOscilloscopeAppC { }
 implementation {
   components MainC, MultihopOscilloscopeC, LedsC, new TimerMilliC(), 
     new DemoSensorC() as Sensor;
+  components PrintfC;
 
   //MainC.SoftwareInit -> Sensor;
   

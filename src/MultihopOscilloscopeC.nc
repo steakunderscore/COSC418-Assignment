@@ -33,6 +33,7 @@ module MultihopOscilloscopeC @safe(){
     interface Receive;
     interface AMSend as SerialSend;
     interface CollectionPacket;
+    interface RouteControl;
     interface RootControl;
 
     interface Queue<message_t *> as UARTQueue;
@@ -235,6 +236,8 @@ implementation {
 	memcpy(o, &local, sizeof(local));
 	if (call Send.send(&sendbuf, sizeof(local)) == SUCCESS)
 	  sendbusy = TRUE;
+      //call RouteControl.PacketSent();
+
         else
           report_problem();
       }
