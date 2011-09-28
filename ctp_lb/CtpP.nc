@@ -135,6 +135,7 @@ implementation {
 
   components new TimerMilliC() as RoutingBeaconTimer;
   components new TimerMilliC() as RouteUpdateTimer;
+  components new TimerMilliC() as LoadBalanceTimer;
   components LinkEstimatorP as Estimator;
   Forwarder.LinkEstimator -> Estimator;
 
@@ -158,6 +159,7 @@ implementation {
   Router.RadioControl -> ActiveMessageC;
   Router.BeaconTimer -> RoutingBeaconTimer;
   Router.RouteTimer -> RouteUpdateTimer;
+  Router.LoadTimer -> LoadBalanceTimer;
   Router.CollectionDebug = CollectionDebug;
   Forwarder.CollectionDebug = CollectionDebug;
   Forwarder.CtpInfo -> Router;

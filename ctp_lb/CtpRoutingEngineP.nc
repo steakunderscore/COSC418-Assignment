@@ -123,6 +123,7 @@ generic module CtpRoutingEngineP(uint8_t routingTableSize, uint32_t minInterval,
         interface SplitControl as RadioControl;
         interface Timer<TMilli> as BeaconTimer;
         interface Timer<TMilli> as RouteTimer;
+        interface Timer<TMilli> as LoadTimer;
         interface Random;
         interface CollectionDebug;
         interface CtpCongestion;
@@ -166,6 +167,7 @@ implementation {
 
     // ETX for load balencing
     uint16_t loadEtx;
+    uint16_t oldLoadEtx;
 
     // forward declarations
     void routingTableInit();
@@ -239,6 +241,7 @@ implementation {
           resetInterval();
           call RouteTimer.startPeriodic(BEACON_INTERVAL);
           dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
+          call LoadTimer.startPeriodic(LOAD_INTERVAL);
       }     
       return SUCCESS;
     }
@@ -271,10 +274,6 @@ implementation {
         return (etx < ETX_THRESHOLD);
     }
 
-   /*command void PacketSent() {
-        loadEtx++;
-   }
-   */
 
     /* updates the routing information, using the info that has been received
      * from neighbor beacons. Two things can cause this info to change: 
@@ -421,7 +420,8 @@ implementation {
             beaconMsg->etx = routeInfo.etx;
             beaconMsg->options |= CTP_OPT_PULL;
         } else {
-            beaconMsg->etx = routeInfo.etx + call LinkEstimator.getLinkQuality(routeInfo.parent) + loadEtx;
+            beaconMsg->etx = routeInfo.etx + call LinkEstimator.getLinkQuality(routeInfo.parent) + (loadEtx/LOAD_EFFECT_THRESHOLD);
+            oldLoadEtx = loadEtx;
         }
 
         dbg("TreeRouting", "%s parent: %d etx: %d\n",
@@ -449,6 +449,29 @@ implementation {
         sending = FALSE;
     }
 
+    /*
+     * This is to be called when ever a packet is sent via the radio.
+     */
+    task void PacketSent() {
+        loadEtx++;
+    }
+
+    /* 
+     * Timer for the load balancing algorithm
+     */
+    event void LoadTimer.fired() {
+        //First de increment loadExt to ensure decay
+        if (loadEtx > 0) {
+            loadEtx--;
+        }
+        //If there is a large change in loadEtx tell nabours
+        if (radioOn && running) {
+            if (loadEtx > oldLoadEtx + 10 || loadEtx < oldLoadEtx - 10) {
+                post sendBeaconTask();
+            }
+        }
+    }
+      
     event void RouteTimer.fired() {
       if (radioOn && running) {
          post updateRouteTask();
