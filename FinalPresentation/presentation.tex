@@ -8,6 +8,8 @@
 \usecolortheme{seahorse}
 \usepackage[latin1]{inputenc}
 \usepackage{mathtools}
+\usepackage{listings}
+\usepackage{verbatim}
 
 \title{COSC418 Project:\\Load balancing in a CTP based network}
 \author{Henry Jenkins and Regan Gunther}
@@ -19,10 +21,10 @@
 
 \frame{\titlepage}
 
-%\section[Outline]{}
-%\frame{\tableofcontents}
+\section[Outline]{}
+\frame{\tableofcontents}
 
-\section{CTP Load Balancing}
+\section{Design}
 \subsection{Overview}
 
 \begin{frame} 
@@ -47,15 +49,80 @@
 \end{frame}
 
 
-\subsection{Our Design}
+\section{Implementation}
+\subsection{Code}
 
-\begin{frame}
+\begin{frame}[fragile]
   \frametitle{Our Design}
   \begin{itemize}
     \item $p^* = \text{arg min}  p \in \{\ \text{direct neighbours} \}\
-      [\alpha  \cdot (ETX_{s,p} + ETX_p) + \beta \cdot L_p^s]$
+                 [\alpha  \cdot (ETX_{s,p} + ETX_p) + \beta \cdot L_p^s]$
 
-    \item Our design is to keep $L_p^s$ locally 
+    \item Our design is to keep $L_p^s$ locally
+  \end{itemize} 
+   
+  \footnotesize{
+  \begin{block}{Code Implementation}
+    \begin{verbatim}
+// ETX for load balancing                                                                                                                                                              
+uint16_t loadEtx;
+
+//Complete Equation:
+beaconMsg->etx = routeInfo.etx + 
+call LinkEstimator.getLinkQuality(routeInfo.parent) 
++ (loadEtx/LOAD_EFFECT_THRESHOLD);
+    \end{verbatim}
+  \end{block}
+}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{$t_p^s$}
+  \footnotesize{
+    \begin{block}{Code Implementation}
+      \begin{verbatim}
+/* 
+ * Timer for the load balancing algorithm
+ */
+event void LoadTimer.fired() {
+  //First de increment loadExt to ensure decay
+  if (loadEtx > 0) {
+    loadEtx--;
+  }
+  //If there is a large change in loadEtx tell nabours
+  if (radioOn && running) {
+    if (loadEtx > oldLoadEtx + 10 || 
+        (oldLoadEtx > 10 && loadEtx < oldLoadEtx - 10)) {
+      post sendBeaconTask();
+    }
+  }
+}
+      \end{verbatim}
+    \end{block}
+  }
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{$n_p^s$}
+  \footnotesize{
+    \begin{block}{Code Implementation}
+      \begin{verbatim}
+/*
+ * This is to be called when ever a packet is sent via the radio.
+ */
+command void Routing.packetSent() {
+  loadEtx++;
+  printf("P\n");
+  //printf("Load ETX Incremented. It is now: %d\n",loadEtx);
+  //printfflush();
+}
+      \end{verbatim}
+    \end{block}
+  }
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
     \item We increment $L_p^s$ as:
     \item $L_p^s = n_p^s - t_p^s$
     \item $n_p^s \geq t_p^s$
@@ -71,7 +138,7 @@
 
 \subsection{Drawbacks}
 
-\begin{frame}
+\begin{frame}[fragile]
   \frametitle{Drawbacks}
     What if $ETX_p + ETX_{p,s} + L_p^s$ (i.e. $ETX_s$) increases to be $\geq 2^{16}$?
   \begin{itemize}
@@ -81,10 +148,6 @@
     \item (Remember $L_p^s = n_p^s - t_p^s$ )
     \item Periodic timer.
   \end{itemize}
-
-  \begin{block}{Block title}
-  This is a block in blue
-  \end{block}
 
 \end{frame}  
 
@@ -110,7 +173,12 @@
   \end{itemize}
 \end{frame}  
 
-\subsection{Conclusion}
+
+\section{Results \& Conclusions}
+\subsection{Testing}
+%wank on about using Mviz
+
+\subsection{Conclusions}
 
 \begin{frame}
   \frametitle{Conclusion}
@@ -119,157 +187,6 @@
     \item Currently implementing and testing code
   \end{itemize}
 \end{frame}  
-
-
-
-
-
-%
-%\subsection{Design Requirements}
-%\frame {
-%  \frametitle{Requirements}
-%  \begin{enumerate}
-%    \item<1-> Measurements
-%    \begin{enumerate}
-%	  \item Measure supply currents ranging from 0.1 uA up to 100 mA
-%      \item Measure currents at Frequency range of DC to 10 kHz
-%      \item Measure supply voltages of up to 10V with a resolution of 0.1 mV
-%    \end{enumerate}
-%    \item<2-> External Interface
-%    \begin{enumerate}
-%      \item Allows the user to turn sensor on or off, and to start or stop data
-%            recording
-%      \item Provide indication of on/off status and whether recording is underway
-%      \item Allow retrieval of recorded measurements
-%    \end{enumerate}
-%    \item<3-> Power Supply (Battery)
-%    \begin{enumerate}
-%      \item Should be replaceable, or rechargeable via USB
-%      \item Should allow at least 24 hours of use before requiring replacement or
-%            recharge
-%    \end{enumerate}
-%  \end{enumerate}
-%}
-%
-%\section{Technical}
-%%TODO talk about requirments
-%%TODO How are we measureing currnet and voltage
-%\subsection{Main Circuit}
-%\begin{frame}
-%  \frametitle{Circuit Block Diagram}
-%  \begin{center}
-%    \includegraphics[width=.8\textwidth]{../Report/Images/CircuitBlockDiagram}
-%  \end{center}
-%\end{frame}
-%
-%\subsection{Data collection}
-%\begin{frame}
-%  \frametitle{ADC Circuits}
-%    \begin{columns}[c] % the "c" option specifies center vertical alignment
-%      \column{.5\textwidth} % column designated by a command
-%        \begin{itemize}
-%          \item<1-> MOSFET to disconnect
-%          \item<1-> Voltage divider for 3.3$V_{Max}$
-%        \end{itemize}
-%      \column{.5\textwidth}
-%        \begin{center}
-%          \includegraphics[width=\textwidth]<1->{../Report/Images/VoltageSensorCircuit}
-%        \end{center}
-%    \end{columns}
-%
-%    \begin{columns}[c] % the "c" option specifies center vertical alignment
-%      \column{.5\textwidth} % column designated by a command
-%        \begin{itemize}
-%          \item<2-> 1 Ohm Resister
-%          \item<2-> $.1\mu V < V_{R} < 100mV$
-%          \item<2-> Op-amp to bring voltage $0V < V_{opamp} < 3.3V$
-%        \end{itemize}
-%      \column{.5\textwidth}
-%        \begin{center}
-%          \includegraphics[width=\textwidth]<2->{../Report/Images/CurrentSensorCircuit}
-%        \end{center}
-%    \end{columns}
-%\end{frame}
-%
-%\subsection{Data numbers}
-%\frame {
-%  \frametitle{How much data?}
-%    \begin{itemize}
-%      \item<1-> Measure current at frequency of 10 kHz
-%        \begin{itemize}
-%          \item That's 20 kHz to prevent aliasing
-%        \end{itemize}
-%      \item<2-> 20 bits per sample
-%      \item<3-> 24 Hours
-%      \item<4-> 4.32 GB
-%    \end{itemize}
-%}
-%
-%\subsection{Power Supply}
-%\frame {
-%  \frametitle{Batter Power Supply}
-%  \begin{columns}
-%  \column{.5\textwidth}
-%    \begin{itemize}
-%    \item<1-> Requires
-%      \begin{itemize}
-%        \item 3.3V
-%        \item 335mA
-%        \item 8 Amp-hours
-%        \item Rechargeable
-%      \end{itemize}
-%    \item 3x D cell NiMH
-%    \begin{itemize}
-%    \item 9 Amp-hours
-%    \item 3.6V
-%    \end{itemize}
-%  \end{itemize}
-%  \column{.5\textwidth}
-%    \includegraphics[width=\textwidth]{Images/Battery}
-%  \end{columns}
-%}
-%
-%\section{Conclusion}
-%\subsection{Future Developments}
-%\frame {
-%  \frametitle{Future Developments}
-%    \begin{itemize}
-%      \item<1-> Event Marking
-%      \item<2-> Collect Other Environmental Data
-%      \begin{itemize}
-%        \item Temperature
-%        \item Humidity
-%        \item Vibration
-%        % On a pole causing antina shaking etc.
-%        \item Moisture
-%      \end{itemize}
-%      \item<3-> It's own wireless sensor network
-%    \end{itemize}
-%}
-%\subsection{Conclusion}
-%\frame {
-%  \frametitle{Conclusion}
-%    \begin{itemize}
-%      \item<1-> 24 Hours data collection
-%      \item<2-> 4.3 GB of data collected
-%      \begin{itemize}
-%        \item Easily accessible by operator
-%        \item Post processing on computer
-%      \end{itemize}
-%      \item<3-> Longer data collection periods
-%    \end{itemize}
-%}
-%
-%\section{Questions}
-%
-%\frame {
-%  \frametitle{Questions?}
-%  \begin{LARGE}
-%    \begin{center}
-%    Questions?
-%    \end{center}
-%  \end{LARGE}
-%}
 
 
 \end{document}
