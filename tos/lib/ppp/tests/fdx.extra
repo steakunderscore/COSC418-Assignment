@@ -1,4 +1,0 @@
-ifeq ($(FDX),)
-FDX=1
-endif
-PFLAGS += -DFULL_DUPLEX=$(FDX)

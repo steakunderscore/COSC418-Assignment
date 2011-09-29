@@ -1,6 +1,0 @@
-# Control the flag that enables tx/rx suppression of the address control
-# octets in HDLC frames.
-ifeq ($(ACCOMP),)
-ACCOMP=1
-endif
-PFLAGS += -DACCOMP=$(ACCOMP)
