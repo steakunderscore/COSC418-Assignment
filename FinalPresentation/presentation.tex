@@ -1,4 +1,4 @@
-% COSC418 Interim Presentation
+% COSC418 Final Presentation
 % Regan Gunther and Henry Jenkins - 2011
 
 %\documentclass[handout]{beamer}
@@ -27,24 +27,34 @@
 \section{Design}
 \subsection{Overview}
 
-\begin{frame} 
-  \frametitle{Overview}
+\begin{frame}[fragile]
+  \frametitle{UnicastNameFreeRouting}
+  
+    \begin{itemize}
+      \item We took the original UnicastNameFreeRouting interface
+            and turned this into UnicastNameFreeLoadBalRouting by adding extra
+            load balancing features.
+    \end{itemize}
+
+  \footnotesize{
+    \begin{block}{Code Implementation}
+      \begin{verbatim}
+interface UnicastNameFreeLoadBalRouting {
+
+  command am_addr_t nextHop();
+  command bool hasRoute();
+  //Triggers a packet notification
+  command void packetSent();
+  
+  event void routeFound();
+  event void noRoute();
+}
+      \end{verbatim}
+    \end{block}
+  }
   \begin{itemize}
-    \item CTP - Collection Tree Protocol
-      \begin{itemize}
-        \item Address-free
-        \item Best effort delivery
-        \item Single hop transmissions
-        \item Designed for low traffic environments
-        \item Expected transmission (ETX) 
-        \item Each node contains a Link Cost metric.
-      \end{itemize}
-    \item CTP LB - Collection Tree Protocol Load Balancing
-      \begin{itemize}
-        \item Add load balancing
-        \item Avoid node hotspots
-        \item Traffic balancing
-      \end{itemize}
+    \item Interface provided by CtpRoutingEngine and used by
+    MultiHopOscilloscope
   \end{itemize}
 \end{frame}
 
@@ -85,7 +95,7 @@ call LinkEstimator.getLinkQuality(routeInfo.parent)
  * Timer for the load balancing algorithm
  */
 event void LoadTimer.fired() {
-  //First de increment loadExt to ensure decay
+  //First decrement loadEtx to ensure decay
   if (loadEtx > 0) {
     loadEtx--;
   }
@@ -121,19 +131,31 @@ command void Routing.packetSent() {
   }
 \end{frame}
 
-\begin{frame}
-  \begin{itemize}
-    \item We increment $L_p^s$ as:
-    \item $L_p^s = n_p^s - t_p^s$
-    \item $n_p^s \geq t_p^s$
-    \item Where $t_p^s$ is incremented periodically through a timer
-    \item $t_p^s$ is included to stop $L_p^s$ getting too large.
-    \item \textbf{Why do this instead of transmitting link load data}
-    \item Allows us to use the unmodified CTP routing packet
-    \item Means we can add load balancing to an existing CTP network
-    \item No extra data transmission
-  \end{itemize}
 
+\begin{frame}[fragile]
+  \frametitle{Parameter Definitions}
+  In TreeRouting.h:
+  \footnotesize{
+    \begin{block}{Code Implementation}
+      \begin{verbatim}
+enum {
+    ...
+
+    // Load balancing timer
+    LOAD_INTERVAL = 100,        
+
+    //Number of packets per rollover
+    LOAD_EFFECT_THRESHOLD = 1, 
+
+    ...
+}; 
+      \end{verbatim}
+    \end{block}
+
+    \begin{itemize}
+      \item This allowed for easy access of values during the testing stage
+    \end{itemize}
+  }
 \end{frame}
 
 \subsection{Drawbacks}
