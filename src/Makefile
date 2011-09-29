@@ -1,8 +1,9 @@
 COMPONENT=MultihopOscilloscopeAppC
 
 # This is for us to use our version of CTP
-CFLAGS += -I../ctp_lb
-CFLAGS += -I../tos/lib/net/ -I$(TOSDIR)/lib/net/4bitle
+CFLAGS += -I../tos/lib/net/ctp_lb
+CFLAGS += -I$(TOSDIR)/lib/net/
+CFLAGS += -I$(TOSDIR)/lib/net/4bitle
 CFLAGS += -I$(TOSDIR)/lib/printf
 CFLAGS += -DCC2420_DEF_RFPOWER=2
 
