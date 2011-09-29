@@ -14,7 +14,8 @@
 
 
 \title{COSC418 Project:\\Load balancing in a CTP based network}
-\author{Henry Jenkins and Regan Gunther}
+\author{Henry Jenkins and Regan Gunther\vspace{20pt} \\
+\tiny{(https://github.com/steakunderscore/COSC418-Assignment)}}
 \date{September 30, 2011}
 \institute[2011]{Department of Computer and Electrical Engineering,\\
     University of Canterbury, \\ Christchurch, \\ New Zealand}
@@ -59,6 +60,54 @@ interface UnicastNameFreeLoadBalRouting {
     MultiHopOscilloscope
   \end{itemize}
 \end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{UnicastNameFreeLoadBalRouting Wiring}
+  
+    \begin{itemize}
+      \item We rewired the CtpForwardingEngine and CtpRoutingEngine to be
+      connected by UnicastNameFreeLoadBalRouting rather than the original
+      UnicastNameFreeRouting
+    \end{itemize}
+
+  \footnotesize{
+    \begin{block}{Code Implementation (CtpP.nc)}
+      \begin{verbatim}
+implementation {
+  ...
+
+  components new CtpForwardingEngineP() as Forwarder;
+  components new CtpRoutingEngineP(...) as Router;
+
+  Forwarder.UnicastNameFreeLoadBalRouting -> Router.Routing;
+
+  ...
+}
+      \end{verbatim}
+    \end{block}
+  }
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{UnicastNameFreeLoadBalRouting Wiring (Contd.)}
+  
+    \begin{itemize}
+      \item The rewiring of UnicastNameFreeLoadBalRouting is shown below
+    \end{itemize}
+
+  \footnotesize{
+    \begin{block}{Wiring block diagram}
+        \centering{
+          \includegraphics[width=0.75\textwidth]{Images/Components.png}
+        }
+    \end{block}
+  }
+\end{frame}
+
+
+
 
 
 \section{Implementation}
@@ -161,76 +210,73 @@ enum {
 \end{frame}
 
 
+\section{Figures}
+\subsection{CTP}
 
 \begin{frame}[fragile]
-  \frametitle{Figure}
-   % \includegraphics[width=\textwidth]{Demo_s1}
+  \frametitle{Initialisation}
   \footnotesize{
-    \begin{block}{Figure}
-        \includegraphics[width=\textwidth]{Images/Demo_s1}
+    \begin{block}{Data flow}
+        \includegraphics[width=\textwidth]{Images/Demo_plain}
     \end{block}
-
-    \begin{itemize}
-      \item This allowed for easy access of values during the testing stage
-    \end{itemize}
   }
 \end{frame}
 
 
-
-
-
-
-
-\subsection{Drawbacks}
+\begin{frame}[fragile]
+  \frametitle{Initial route}
+  \footnotesize{
+    \begin{block}{Data flow}
+        \includegraphics[width=\textwidth]{Images/Demo_s1}
+    \end{block}
+  }
+\end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Drawbacks}
-    What if $ETX_p + ETX_{p,s} + L_p^s$ (i.e. $ETX_s$) increases to be $\geq 2^{16}$?
-  \begin{itemize}
-    \item Bad things\ldots
-    \item This is managed by including the $t_p^s$ in the loading parameter
-    $L_p^s$
-    \item (Remember $L_p^s = n_p^s - t_p^s$ )
-    \item Periodic timer.
-  \end{itemize}
-
-\end{frame}  
+  \frametitle{Load balanced}
+  \footnotesize{
+    \begin{block}{Data flow}
+        \includegraphics[width=\textwidth]{Images/Demo_s2}
+    \end{block}
+  }
+\end{frame}
 
 
-
-\begin{frame}
-  \frametitle{Drawbacks}
-    ETX changing with each packet transmission causes routing updates all the
-    time. All these updates would be inefficient.
-  \begin{itemize}
-    \item A solution to this is to only update routes when ETX changes by a given
-    threshold
-    \end{itemize}
-\end{frame}  
-
-
-\begin{frame}
-  \frametitle{Drawbacks}
-    Exponential ETX growth of a node
-  \begin{itemize}
-    \item In a path of 5 nodes to the root, $L_p^s$ increases with every packet.
-    The more hops to the root, the more pronounced this effect
-  \end{itemize}
-\end{frame}  
-
+\begin{frame}[fragile]
+  \frametitle{Load balanced (again)}
+  \footnotesize{
+    \begin{block}{Data flow}
+        \includegraphics[width=\textwidth]{Images/Demo_s3}
+    \end{block}
+  }
+\end{frame}
 
 \section{Results \& Conclusions}
 \subsection{Testing}
-%wank on about using Mviz
+
+\begin{frame}
+  \frametitle{Testing}
+  \begin{itemize}
+    \item Using lower transmit power
+    \item \emph{printf} client to debug
+    \item Listen client to view raw traffic
+    \item Transmitting routing beacon every data packet
+    \item Couldn't get Multihop oscilloscope working
+    \item MViz showed our shifting ETX values
+  \end{itemize}
+\end{frame}  
 
 \subsection{Conclusions}
 
 \begin{frame}
   \frametitle{Conclusion}
   \begin{itemize}
-    \item No results as yet
+    \item Still working on finding correct thresholds
     \item Currently implementing and testing code
+    \item Can visualise operation using the MViz application
+    \item We have implemented load balancing as a component to plug into
+    standard CTP
+    \item Simply include our CTP to use
   \end{itemize}
 \end{frame}  
 
