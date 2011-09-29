@@ -40,6 +40,8 @@ module MultihopOscilloscopeC @safe(){
 
     // Miscalleny:
     interface Timer<TMilli>;
+    interface Timer<TMilli> as DummyFrameTimer;
+    
     interface Read<uint16_t>;
     interface Leds;
   }
@@ -85,6 +87,9 @@ implementation {
 
     if (call RoutingControl.start() != SUCCESS)
       fatal_problem();
+
+    call DummyFrameTimer.startPeriodic(50); //Set a frame to be sent every 50ms
+
   }
 
   event void RadioControl.startDone(error_t error) {
@@ -220,6 +225,18 @@ implementation {
     return msg;
   }
 
+  //Sends a packet of data periodically
+  event void DummyFrameTimer.fired() 
+  {
+	if (call Send.send(&sendbuf, sizeof(local)) == SUCCESS)
+    {
+        call Leds.led2Toggle();
+    }
+  }
+
+
+
+
   /* At each sample period:
      - if local sample buffer is full, send accumulated samples
      - read next sample
@@ -245,7 +262,7 @@ implementation {
       /* Part 2 of cheap "time sync": increment our count if we didn't
          jump ahead. */
       if (!suppress_count_change)
-        local.count++;
+       local.count++;
       suppress_count_change = FALSE;
     }
 
@@ -282,5 +299,5 @@ implementation {
 
   static void report_problem() { call Leds.led0Toggle(); }
   static void report_sent() { call Leds.led1Toggle(); }
-  static void report_received() { call Leds.led2Toggle(); }
+  static void report_received() { /*call Leds.led2Toggle();*/   }
 }

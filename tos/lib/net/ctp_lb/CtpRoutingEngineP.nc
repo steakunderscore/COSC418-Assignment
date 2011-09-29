@@ -255,7 +255,6 @@ implementation {
     event void RadioControl.startDone(error_t error) {
         radioOn = TRUE;
         dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
-        printfflush();
         if (running) {
             uint16_t nextInt;
             nextInt = call Random.rand16() % BEACON_INTERVAL;
@@ -286,8 +285,8 @@ implementation {
         uint16_t currentEtx;
         uint16_t linkEtx, pathEtx;
 
-        printf("The update route task function was called\n");
-        printfflush();
+        //printf("The update route task function was called\n");
+        //printfflush();
         if (state_is_root)
             return;
        
@@ -442,6 +441,7 @@ implementation {
     }
 
     event void BeaconSend.sendDone(message_t* msg, error_t error) {
+        printf("B\n");
         if ((msg != &beaconMsgBuffer) || !sending) {
             //something smells bad around here
             return;
@@ -454,6 +454,9 @@ implementation {
      */
     command void Routing.packetSent() {
         loadEtx++;
+        printf("P\n");
+        //printf("Load ETX Incremented. It is now: %d\n",loadEtx);
+        //printfflush();
     }
 
     /* 
@@ -783,6 +786,9 @@ implementation {
             routingTable[idx].info.haveHeard = 1;
             dbg("TreeRouting", "%s OK, updated entry\n", __FUNCTION__);
         }
+        printf("routing table size is: %d\n",routingTableActive);
+        printfflush();
+
         return SUCCESS;
     }
 

@@ -26,6 +26,7 @@ implementation {
   
   MultihopOscilloscopeC.Boot -> MainC;
   MultihopOscilloscopeC.Timer -> TimerMilliC;
+  MultihopOscilloscopeC.DummyFrameTimer -> TimerMilliC;
   MultihopOscilloscopeC.Read -> Sensor;
   MultihopOscilloscopeC.Leds -> LedsC;
 
