@@ -30,6 +30,28 @@
 \section{Design}
 \subsection{Overview}
 
+\begin{frame}
+  \frametitle{Our Design}
+  \begin{itemize}
+    \item $p^* = \text{arg min}  p \in \{\ \text{direct neighbours} \}\
+      [\alpha  \cdot (ETX_{s,p} + ETX_p) + \beta \cdot L_p^s]$
+
+    \item Our design is to keep $L_p^s$ locally 
+    \item We increment $L_p^s$ as:
+    \item $L_p^s = n_p^s - t_p^s$
+    \item $n_p^s \geq t_p^s$
+    \item Where $t_p^s$ is incremented periodically through a timer
+    \item $t_p^s$ is included to stop $L_p^s$ getting too large.
+    \end{itemize}
+    Why do this instead of transmitting link load data
+    \begin{itemize}
+    \item Allows us to use the unmodified CTP routing packet
+    \item Means we can add load balancing to an existing CTP network
+    \item No extra data transmission
+  \end{itemize}
+
+\end{frame}
+
 \begin{frame}[fragile]
   \frametitle{UnicastNameFreeRouting}
   
