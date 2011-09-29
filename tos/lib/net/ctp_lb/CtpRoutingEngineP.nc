@@ -469,7 +469,7 @@ implementation {
         }
         //If there is a large change in loadEtx tell nabours
         if (radioOn && running) {
-            if (loadEtx > oldLoadEtx + 10 || loadEtx < oldLoadEtx - 10) {
+            if (loadEtx > oldLoadEtx + 10 || (oldLoadEtx > 10 && loadEtx < oldLoadEtx - 10)) {
                 post sendBeaconTask();
             }
         }
@@ -649,7 +649,7 @@ implementation {
             signal Routing.routeFound();
         dbg("TreeRouting","%s I'm a root now!\n",__FUNCTION__);
         printf("I'm a root now!\n");
-        printfflush();
+        //printfflush();
         call CollectionDebug.logEventRoute(NET_C_TREE_NEW_PARENT, routeInfo.parent, 0, routeInfo.etx);
         return SUCCESS;
     }
@@ -787,7 +787,7 @@ implementation {
             dbg("TreeRouting", "%s OK, updated entry\n", __FUNCTION__);
         }
         printf("routing table size is: %d\n",routingTableActive);
-        printfflush();
+        //printfflush();
 
         return SUCCESS;
     }

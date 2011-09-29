@@ -5,7 +5,7 @@ enum {
     AM_TREE_ROUTING_CONTROL = 0xCE,
     BEACON_INTERVAL = 8192, 
     LOAD_INTERVAL = 100,    // Load balancing timer
-    LOAD_EFFECT_THRESHOLD = 16, //Number of packets per rollover
+    LOAD_EFFECT_THRESHOLD = 1, //Number of packets per rollover
     INVALID_ADDR  = TOS_BCAST_ADDR,
     ETX_THRESHOLD = 50,      // link quality=20% -> ETX=5 -> Metric=50 
     PARENT_SWITCH_THRESHOLD = 15,
