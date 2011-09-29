@@ -52,7 +52,7 @@ interface UnicastNameFreeLoadBalRouting {
    */
   command am_addr_t nextHop();
   command bool hasRoute();
-  command void packetSend();
+  command void packetSent();
   
   event void routeFound();
   event void noRoute();

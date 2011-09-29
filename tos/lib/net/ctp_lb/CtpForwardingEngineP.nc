@@ -127,7 +127,7 @@ generic module CtpForwardingEngineP() {
     interface PacketAcknowledgements;
     interface Timer<TMilli> as RetxmitTimer;
     interface LinkEstimator; 
-    interface UnicastNameFreeRouting;
+    interface UnicastNameFreeLoadBalRouting;
     interface Packet as SubPacket;
 
     // These four data structures are used to manage packets to forward.
@@ -259,12 +259,12 @@ implementation {
    * these has been no route, then as soon as one is found, start
    * sending packets.
    */ 
-  event void UnicastNameFreeRouting.routeFound() {
+  event void UnicastNameFreeLoadBalRouting.routeFound() {
     dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
     post sendTask();
   }
 
-  event void UnicastNameFreeRouting.noRoute() {
+  event void UnicastNameFreeLoadBalRouting.noRoute() {
     // Depend on the sendTask to take care of this case;
     // if there is no route the component will just resume
     // operation on the routeFound event
@@ -294,6 +294,7 @@ implementation {
   command error_t Send.send[uint8_t client](message_t* msg, uint8_t len) {
     ctp_data_header_t* hdr;
     fe_queue_entry_t *qe;
+    call UnicastNameFreeLoadBalRouting.packetSent();
     dbg("Forwarder", "%s: sending packet from client %hhu: %x, len %hhu\n", __FUNCTION__, client, msg, len);
     if (!hasState(ROUTING_ON)) {return EOFF;}
     if (len > call Send.maxPayloadLength[client]()) {return ESIZE;}
@@ -376,7 +377,7 @@ implementation {
       return;
     }
     else if ((!call RootControl.isRoot() && 
-	      !call UnicastNameFreeRouting.hasRoute()) ||
+	      !call UnicastNameFreeLoadBalRouting.hasRoute()) ||
 	     (call CtpInfo.getEtx(&gradient) != SUCCESS)) {
       /* This code path is for when we don't have a valid next
        * hop. We set a retry timer.
@@ -398,7 +399,7 @@ implementation {
       error_t subsendResult;
       fe_queue_entry_t* qe = call SendQueue.head();
       uint8_t payloadLen = call SubPacket.payloadLength(qe->msg);
-      am_addr_t dest = call UnicastNameFreeRouting.nextHop();
+      am_addr_t dest = call UnicastNameFreeLoadBalRouting.nextHop();
 
       if (call SentCache.lookup(qe->msg)) {
 	/* This packet is a duplicate, so suppress it: free memory and

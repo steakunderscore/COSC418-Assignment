@@ -180,7 +180,7 @@ implementation {
   Forwarder.SubSnoop -> AMSnooperC;
   Forwarder.SubPacket -> AMSenderC;
   Forwarder.RootControl -> Router;
-  Forwarder.UnicastNameFreeRouting -> Router.Routing;
+  Forwarder.UnicastNameFreeLoadBalRouting -> Router.Routing;
   Forwarder.RadioControl -> ActiveMessageC;
   Forwarder.PacketAcknowledgements -> AMSenderC.Acks;
   Forwarder.AMPacket -> AMSenderC;

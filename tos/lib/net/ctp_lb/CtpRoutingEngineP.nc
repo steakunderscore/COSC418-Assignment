@@ -107,7 +107,7 @@
 
 generic module CtpRoutingEngineP(uint8_t routingTableSize, uint32_t minInterval, uint32_t maxInterval) {
     provides {
-        interface UnicastNameFreeRouting as Routing;
+        interface UnicastNameFreeLoadBalRouting as Routing;
         interface RootControl;
         //interface RouteControl;
         interface CtpInfo;
@@ -452,7 +452,7 @@ implementation {
     /*
      * This is to be called when ever a packet is sent via the radio.
      */
-    task void PacketSent() {
+    command void Routing.packetSent() {
         loadEtx++;
     }
 
@@ -560,7 +560,7 @@ implementation {
         }
     }
 
-    /* Interface UnicastNameFreeRouting */
+    /* Interface UnicastNameFreeLoadBalRouting */
     /* Simple implementation: return the current routeInfo */
     command am_addr_t Routing.nextHop() {
         return routeInfo.parent;    

@@ -33,7 +33,6 @@ module MultihopOscilloscopeC @safe(){
     interface Receive;
     interface AMSend as SerialSend;
     interface CollectionPacket;
-    interface RouteControl;
     interface RootControl;
 
     interface Queue<message_t *> as UARTQueue;
